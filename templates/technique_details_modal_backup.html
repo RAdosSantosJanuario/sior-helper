@@ -1,0 +1,592 @@
+<div class="modal-content">
+  <div class="modal-header">
+    <h5 class="modal-title">Details for {{ technique.name }}</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+  </div>
+  <div class="modal-body">
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" id="detailTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="info-tab-{{ technique.technique_id }}" data-bs-toggle="tab" data-bs-target="#info-{{ technique.technique_id }}" type="button" role="tab" aria-controls="info" aria-selected="true">Technique Info <span class="material-icons">info</span></button>
+      </li>
+      <!-- Detection Tabs -->
+      {% for key, detections in technique.detections.items() if detections %}
+        <li class="nav-item" role="presentation">
+          <button class="nav-link detection-tab" id="{{ key }}-tab-{{ technique.technique_id }}" data-bs-toggle="tab" data-bs-target="#{{ key }}-detection-{{ technique.technique_id }}" type="button" role="tab" aria-controls="{{ key }}" aria-selected="false">{{ key|capitalize }} Detections <span class="material-icons">search</span></button>
+        </li>
+      {% endfor %}
+      <!-- Responses Tabs -->
+      {% for key, responses in technique.responses.items() if responses|length > 0 %}
+        <li class="nav-item" role="presentation">
+          <button class="nav-link response-tab" id="{{ key }}-response-tab-{{ technique.technique_id }}" data-bs-toggle="tab" data-bs-target="#{{ key }}-response-{{ technique.technique_id }}" type="button" role="tab" aria-controls="{{ key }}" aria-selected="false">{{ key|capitalize }} Responses <span class="material-icons">shield</span></button>
+        </li>
+      {% endfor %}
+      <!-- Tests Tabs -->
+      {% for key, tests in technique.tests.items() if tests|length > 0 %}
+        <li class="nav-item" role="presentation">
+          <button class="nav-link response-tab" id="{{ key }}-tests-tab-{{ technique.technique_id }}" data-bs-toggle="tab" data-bs-target="#{{ key }}-test-{{ technique.technique_id }}" type="button" role="tab" aria-controls="{{ key }}" aria-selected="false">{{ key|capitalize }} Tests <span class="material-icons">safety_check</span></button>
+        </li>
+      {% endfor %}
+    </ul>
+
+    <!-- Tab content -->
+    <div class="tab-content" id="myTabContent">
+      <!-- Technique Info Tab -->
+      <div class="tab-pane fade show active" id="info-{{ technique.technique_id }}" role="tabpanel" aria-labelledby="info-tab-{{ technique.technique_id }}">
+        <div class="card">
+          <div class="card-body">
+            <table class="table">
+              <tbody>
+                <tr>
+                  <th scope="row">ID</th>
+                  <td>{{ technique.technique_id }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Description</th>
+                  <td>{{ technique.description|markdown|safe }}</td>
+                </tr>
+                {% if technique.references|length > 0 %}
+                  <tr>
+                    <th scope="row">References</th>
+                    <td>
+                      <ul class="list-unstyled">
+                        {% for reference in technique.references %}
+                          <li>
+                            {% if reference.url %}
+                              {{ reference.url|markdown|safe }}
+                            {% endif %}
+                            {% if reference.description %}
+                              {{ reference.description|markdown|safe }}
+                            {% endif %}
+                            {% if reference.external_id %}
+                              {{ reference.external_id }}
+                            {% endif %}
+                          </li>
+                        {% endfor %}
+                      </ul>
+                    </td>
+                  </tr>
+                {% endif %}
+                <a href="https://attack.mitre.org/techniques/{{ technique.technique_id|replace('.', '/') }}/" target="_blank" class="btn btn-primary">
+                  View in MITRE ATT&CK
+                  <span class="material-icons">launch</span>
+                </a>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detections Tabs -->
+      {% for key, detections in technique.detections.items() if detections %}
+        <div class="tab-pane fade" id="{{ key }}-detection-{{ technique.technique_id }}" role="tabpanel" aria-labelledby="{{ key }}-detection-tab-{{ technique.technique_id }}">
+          <div class="card">
+            <div class="card-body">
+              {% if key == 'att&ck' %}
+                {% for detection in detections %}
+                  <div class="accordion accordion-space" id="accordion-{{ technique.technique_id }}-detection-{{ detection.id }}">
+                    <div class="accordion-item">
+                      <h2 class="accordion-header" id="headingOne-{{ technique.technique_id }}-detection-{{ detection.id }}"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne-{{ technique.technique_id }}-detection-{{ detection.id }}" aria-expanded="true" aria-controls="collapseOne-{{ technique.technique_id }}-detection-{{ detection.id }}">{{ detection.id }}</button></h2>
+
+                      <div id="collapseOne-{{ technique.technique_id }}-detection-{{ detection.id }}" class="accordion-collapse collapse in" aria-labelledby="headingOne-{{ technique.technique_id }}-detection-{{ detection.id }}" data-bs-parent="#accordion-{{ technique.technique_id }}-detection-{{ detection.id }}">
+                        <div class="accordion-body">
+                          <div class="card-body">
+                            <table class="table">
+                              <tbody>
+                                <tr>
+                                  <th scope="row">ID</th>
+                                  <td>{{ detection.id }}</td>
+                                </tr>
+                                <tr>
+                                  <th scope="row">Description</th>
+                                  <td>{{ detection.description|safe }}</td>
+                                </tr>
+                                <tr>
+                                  <th scope="row">References</th>
+                                  <td>{{ detection.references|safe }}</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              {% endif %} {% if key == 'd3fend' %}
+                {% for detection in detections %}
+                  <div class="accordion accordion-space" id="accordion-{{ technique.technique_id }}-detection-{{ detection.id }}">
+                    <div class="accordion-item">
+                      <h2 class="accordion-header" id="headingOne-{{ technique.technique_id }}-detection-{{ detection.id }}"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne-{{ technique.technique_id }}-detection-{{ detection.id }}" aria-expanded="true" aria-controls="collapseOne-{{ technique.technique_id }}-detection-{{ detection.id }}">{{ detection.id }}</button></h2>
+
+                      <div id="collapseOne-{{ technique.technique_id }}-detection-{{ detection.id }}" class="accordion-collapse collapse in" aria-labelledby="headingOne-{{ technique.technique_id }}-detection-{{ detection.id }}" data-bs-parent="#accordion-{{ technique.technique_id }}-detection-{{ detection.id }}">
+                        <div class="accordion-body">
+                          <div class="card-body">
+                            <table class="table">
+                              <tbody>
+                                <tr>
+                                  <th scope="row">ID</th>
+                                  <td>{{ detection.id }}</td>
+                                </tr>
+                                <tr>
+                                  <th scope="row">Title</th>
+                                  <td>{{ detection.title }}</td>
+                                </tr>
+                                <tr>
+                                  <th scope="row">Description</th>
+                                  <td>{{ detection.description }}</td>
+                                </tr>
+                                {% if detection.detection and detection.detection != 'None' %}
+                                  <tr>
+                                    <th scope="row">Detection</th>
+                                    <td>{{ detection.detection|safe }}</td>
+                                  </tr>
+                                {% endif %}
+                                <a href="https://d3fend.mitre.org/technique/{{ detection.id }}/" target="_blank" class="btn btn-primary">
+                                  View in MITRE D3FEND
+                                  <span class="material-icons">launch</span>
+                                </a>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              {% endif %} {% if key == 'sigma' %}
+                {% for detection in detections %}
+                  <div class="accordion accordion-space" id="accordion-{{ technique.technique_id }}-detection-{{ detection.id }}">
+                    <div class="accordion-item">
+                      <h2 class="accordion-header" id="headingOne-{{ technique.technique_id }}-detection-{{ detection.id }}"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne-{{ technique.technique_id }}-detection-{{ detection.id }}" aria-expanded="true" aria-controls="collapseOne-{{ technique.technique_id }}-detection-{{ detection.id }}">{{ detection.id }}</button></h2>
+
+                      <div id="collapseOne-{{ technique.technique_id }}-detection-{{ detection.id }}" class="accordion-collapse collapse in" aria-labelledby="headingOne-{{ technique.technique_id }}-detection-{{ detection.id }}" data-bs-parent="#accordion-{{ technique.technique_id }}-detection-{{ detection.id }}">
+                        <div class="accordion-body">
+                          <div class="card-body">
+                            <table class="table">
+                              <tbody>
+                                <tr>
+                                  <th scope="row">ID</th>
+                                  <td>{{ detection.id }}</td>
+                                </tr>
+                                <tr>
+                                  <th scope="row">Description</th>
+                                  <td>{{ detection.description|safe }}</td>
+                                </tr>
+                                <tr>
+                                  <th scope="row">References</th>
+                                  <td>
+                                    <ul class="list-unstyled">
+                                      {% if detection.references %}
+                                        {% for ref in detection.references %}
+                                          <li>{{ ref|safe }}</li>
+                                        {% endfor %}
+                                      {% endif %}
+                                    </ul>
+                                  </td>
+                                </tr>
+                                {% if detection.authors %}
+                                  <tr>
+                                    <th scope="row">Authors</th>
+                                    <td>{{ detection.authors }}</td>
+                                  </tr>
+                                {% endif %}
+                                {% if detection.tags %}
+                                  <tr>
+                                    <th scope="row">Tag</th>
+                                    <td>{{ detection.tags.0 }}</td>
+                                  </tr>
+                                {% endif %}
+                                {% if detection.logsource %}
+                                  <tr>
+                                    <th scope="row">Log</th>
+                                    <td>
+                                      <ul class="list-unstyled">
+                                        {% if detection.logsource.category %}
+                                          <li>
+                                            <strong>Category:</strong> {{ detection.logsource.category }}
+                                          </li>
+                                        {% endif %}
+                                        {% if detection.logsource.product %}
+                                          <li>
+                                            <strong>Product:</strong> {{ detection.logsource.product }}
+                                          </li>
+                                        {% endif %}
+                                      </ul>
+                                    </td>
+                                  </tr>
+                                {% endif %}
+                                {% if detection.detection %}
+                                  <tr>
+                                    <th scope="row">Detection</th>
+                                    <td>
+                                      <ul class="list-unstyled">
+                                        {% if detection.detection.selection_img %}
+                                          <li>
+                                            <strong>Selection Image:</strong> {{ detection.detection.selection_img }}
+                                          </li>
+                                        {% endif %}
+
+                                        {% if detection.detection.selection_cli %}
+                                          <li>
+                                            <strong>Selection CLI:</strong> {{ detection.detection.selection_cli }}
+                                          </li>
+                                        {% endif %}
+                                        {% if detection.detection.CommandLine_contains %}
+                                          {% if detection.detection.CommandLine_contains.selection %}
+                                            <ul class="list-unstyled">
+                                              {% for cmd in detection.CommandLine_contains.selection %}
+                                                <li>{{ cmd|safe }}</li>
+                                              {% endfor %}
+                                            </ul>
+                                          {% endif %}
+                                        {% endif %}
+                                        {% if detection.detection.condition %}
+                                          <li>
+                                            <strong>Condition:</strong> {{ detection.detection.condition }}
+                                          </li>
+                                        {% endif %}
+                                      </ul>
+                                    </td>
+                                  </tr>
+                                {% endif %}
+                                <a href="https://github.com/SigmaHQ/sigma/blob/master/{{ detection.file|replace('resources/sigma/', '') }}" target="_blank" class="btn btn-primary">
+                                  View in sigma GitHub
+                                  <span class="material-icons">launch</span>
+                                </a>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              {% endif %} {% if key == 'guardsight' %}
+                {% for detection in detections %}
+                  <div class="accordion accordion-space" id="accordion-{{ technique.technique_id }}-detection-{{ detection.title|replace(' ', '_') }}">
+                    <div class="accordion-item">
+                      <h2 class="accordion-header" id="headingOne-{{ technique.technique_id }}-detection-{{ detection.title|replace(' ', '_') }}"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne-{{ technique.technique_id }}-detection-{{ detection.title|replace(' ', '_') }}" aria-expanded="true" aria-controls="collapseOne-{{ technique.technique_id }}-detection-{{ detection.title|replace(' ', '_') }}">{{ detection.title }}</button></h2>
+
+                      <div id="collapseOne-{{ technique.technique_id }}-detection-{{ detection.title|replace(' ', '_') }}" class="accordion-collapse collapse in" aria-labelledby="headingOne-{{ technique.technique_id }}-detection-{{ detection.title|replace(' ', '_') }}" data-bs-parent="#accordion-{{ technique.technique_id }}-detection-{{ detection.title|replace(' ', '_') }}">
+                        <div class="accordion-body">
+                          <div class="card-body">
+                            <table class="table">
+                              <tbody>
+                                <tr>
+                                  <th scope="row">Title</th>
+                                  <td>{{ detection.title }}</td>
+                                </tr>
+                                <tr>
+                                  <th scope="row">References</th>
+                                  <td>
+                                    <ul class="list-unstyled">
+                                      {% if detection.references %}
+                                        {% for ref in detection.references %}
+                                          <li>{{ ref|safe }}</li>
+                                        {% endfor %}
+                                      {% endif %}
+                                    </ul>
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <th scope="row">Detection</th>
+                                  <td>
+                                    <ol>
+                                      {% for item in detection.detection %}
+                                        <li>{{ item|safe }}</li>
+                                      {% endfor %}
+                                    </ol>
+                                  </td>
+                                </tr>
+                                <a href="https://github.com/guardsight/gsvsoc_cirt-playbook-battle-cards/blob/master/{{ detection.title }}.pdf" target="_blank" class="btn btn-primary">
+                                  View in guardsight GitHub
+                                  <span class="material-icons">launch</span>
+                                </a>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+
+      <!-- Responses Tabs -->
+      {% for key, responses in technique.responses.items() if responses %}
+        <div class="tab-pane fade" id="{{ key }}-response-{{ technique.technique_id }}" role="tabpanel" aria-labelledby="{{ key }}-response-tab-{{ technique.technique_id }}">
+          <div class="card">
+            <div class="card-body">
+              {% if key == 'd3fend' %}
+                {% for response in responses %}
+                  <div class="accordion accordion-space" id="accordion-{{ technique.technique_id }}-response-{{ response.id }}">
+                    <div class="accordion-item">
+                      <h2 class="accordion-header" id="headingOne-{{ technique.technique_id }}-response-{{ response.id }}"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne-{{ technique.technique_id }}-response-{{ response.id }}" aria-expanded="true" aria-controls="collapseOne-{{ technique.technique_id }}-response-{{ response.id }}">{{ response.id }}</button></h2>
+                      <div id="collapseOne-{{ technique.technique_id }}-response-{{ response.id }}" class="accordion-collapse collapse in" aria-labelledby="headingOne-{{ technique.technique_id }}-response-{{ response.id }}" data-bs-parent="#accordion-{{ technique.technique_id }}-response-{{ response.id }}">
+                        <div class="accordion-body">
+                          <div class="card-body">
+                            <table class="table">
+                              <tbody>
+                                <tr>
+                                  <th scope="row">ID</th>
+                                  <td>{{ response.id }}</td>
+                                </tr>
+                                <tr>
+                                  <th scope="row">Title</th>
+                                  <td>{{ response.title }}</td>
+                                </tr>
+                                {% if response.response and response.response != 'None' %}
+                                  <tr>
+                                    <th scope="row">Response</th>
+                                    <td>{{ response.response|safe }}</td>
+                                  </tr>
+                                {% endif %}
+                                <a href="https://d3fend.mitre.org/technique/{{ response.id }}/" target="_blank" class="btn btn-primary">
+                                  View in MITRE D3FEND
+                                  <span class="material-icons">launch</span>
+                                </a>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              {% endif %}
+              {% if key == 'guardsight' %}
+                {% for response in responses %}
+                  <div class="accordion accordion-space" id="accordion-{{ technique.technique_id }}-response-{{ response.title|replace(' ', '_') }}">
+                    <div class="accordion-item">
+                      <h2 class="accordion-header" id="headingOne-{{ technique.technique_id }}-response-{{ response.title|replace(' ', '_') }}"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne-{{ technique.technique_id }}-response-{{ response.title|replace(' ', '_') }}" aria-expanded="true" aria-controls="collapseOne-{{ technique.technique_id }}-response-{{ response.title|replace(' ', '_') }}">{{ response.title }}</button></h2>
+                      <div id="collapseOne-{{ technique.technique_id }}-response-{{ response.title|replace(' ', '_') }}" class="accordion-collapse collapse in" aria-labelledby="headingOne-{{ technique.technique_id }}-response-{{ response.title|replace(' ', '_') }}" data-bs-parent="#accordion-{{ technique.technique_id }}-response-{{ response.title|replace(' ', '_') }}">
+                        <div class="accordion-body">
+                          <div class="card-body">
+                            <table class="table">
+                              <tbody>
+                                <tr>
+                                  <th scope="row">Title</th>
+                                  <td>{{ response.title }}</td>
+                                </tr>
+                                <tr>
+                                  <th scope="row">References</th>
+                                  <td>
+                                    <ul class="list-unstyled">
+                                      {% if response.references %}
+                                        {% for ref in response.references %}
+                                          <li>{{ ref|safe }}</li>
+                                        {% endfor %}
+                                      {% endif %}
+                                    </ul>
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <th scope="row">Response Details</th>
+                                  <td>
+                                    <ul class="list-unstyled">
+                                      <li>
+                                        <strong>Preparation:</strong>
+                                        <ol>
+                                          {% for item in response.response.preparation %}
+                                            <li>{{ item|safe }}</li>
+                                          {% endfor %}
+                                        </ol>
+                                      </li>
+                                      <li>
+                                        <strong>Containment:</strong>
+                                        <ol>
+                                          {% for item in response.response.containment %}
+                                            <li>{{ item|safe }}</li>
+                                          {% endfor %}
+                                        </ol>
+                                      </li>
+                                      <li>
+                                        <strong>Recovery:</strong>
+                                        <ol>
+                                          {% for item in response.response.recovery %}
+                                            <li>{{ item|safe }}</li>
+                                          {% endfor %}
+                                        </ol>
+                                      </li>
+                                      <li>
+                                        <strong>Lessons:</strong>
+                                        <ol>
+                                          {% for item in response.response.lessons %}
+                                            <li>{{ item|safe }}</li>
+                                          {% endfor %}
+                                        </ol>
+                                      </li>
+                                    </ul>
+                                  </td>
+                                </tr>
+                                <a href="https://github.com/guardsight/gsvsoc_cirt-playbook-battle-cards/blob/master/{{ response.title }}.pdf" target="_blank" class="btn btn-primary">
+                                  View in guardsight GitHub
+                                  <span class="material-icons">launch</span>
+                                </a>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+
+      <!-- Tests Tabs -->
+      {% for key, tests in technique.tests.items() if tests %}
+        <div class="tab-pane fade" id="{{ key }}-test-{{ technique.technique_id }}" role="tabpanel" aria-labelledby="{{ key }}-test-tab-{{ technique.technique_id }}">
+          <div class="card">
+            <div class="card-body">
+              {% if key == 'atomic' %}
+                {% for test in tests %}
+                  <div class="accordion accordion-space" id="accordion-{{ technique.technique_id }}-test-{{ test.id }}">
+                    <div class="accordion-item">
+                      <h2 class="accordion-header" id="headingOne-{{ technique.technique_id }}-test-{{ test.id }}"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne-{{ technique.technique_id }}-test-{{ test.id }}" aria-expanded="true" aria-controls="collapseOne-{{ technique.technique_id }}-test-{{ test.id }}">{{ test.title }}</button></h2>
+                      <div id="collapseOne-{{ technique.technique_id }}-test-{{ test.id }}" class="accordion-collapse collapse in" aria-labelledby="headingOne-{{ technique.technique_id }}-test-{{ test.id }}" data-bs-parent="#accordion-{{ technique.technique_id }}-test-{{ test.id }}">
+                        <div class="accordion-body">
+                          <div class="card-body">
+                            <table class="table">
+                              <tbody>
+                                <tr>
+                                  <th scope="row">ID</th>
+                                  <td>{{ test.id }}</td>
+                                </tr>
+                                <tr>
+                                  <th scope="row">Title</th>
+                                  <td>{{ test.title }}</td>
+                                </tr>
+                                <tr>
+                                  <th scope="row">Description</th>
+                                  <td>{{ test.description|safe }}</td>
+                                </tr>
+                                {% if test.platforms %}
+                                  <tr>
+                                    <th scope="row">Platforms</th>
+                                    <td>
+                                      <ul class="list-unstyled">
+                                        {% for plat in test.platforms %}
+                                          <li>{{ plat }}</li>
+                                        {% endfor %}
+                                      </ul>
+                                    </td>
+                                  </tr>
+                                {% endif %}
+                                {% if test.input_arguments %}
+                                  <tr>
+                                    <th scope="row">Input Arguments</th>
+                                    <td>
+                                      <ul class="list-unstyled">
+                                        {% for key, args in test.input_arguments.items() %}
+                                          <li>
+                                            {{ key }}
+                                            <ul class="list-unstyled">
+                                              {% if args.description %}
+                                                <li>
+                                                  <strong>Description:</strong> {{ args.description|markdown|safe }}
+                                                </li>
+                                              {% endif %}
+                                              {% if args.type %}
+                                                <li>
+                                                  <strong>Type:</strong> {{ args.type|markdown|safe }}
+                                                </li>
+                                              {% endif %}
+                                              {% if args.default %}
+                                                <li>
+                                                  <strong>Default:</strong> {{ args.default|markdown|safe }}
+                                                </li>
+                                              {% endif %}
+                                            </ul>
+                                          </li>
+                                        {% endfor %}
+                                      </ul>
+                                    </td>
+                                  </tr>
+                                {% endif %}
+                                {% if test.dependencies %}
+                                  <tr>
+                                    <th scope="row">Dependencies - Dependency Executor: {{ test.dependency_executor_name }}</th>
+                                    <td>
+                                      <ul class="list-unstyled">
+                                        {% for dep in test.dependencies %}
+                                          {% if dep.description %}
+                                            <li>
+                                              <strong>Description:</strong> {{ dep.description }}
+                                            </li>
+                                          {% endif %}
+                                          {% if dep.prereq_command %}
+                                            <li>
+                                              <strong>Prereq Command:</strong> {{ dep.prereq_command }}
+                                            </li>
+                                          {% endif %}
+                                          {% if dep.get_prereq_command %}
+                                            <li>
+                                              <strong>Get Prereq Command:</strong> {{ dep.get_prereq_command }}
+                                            </li>
+                                          {% endif %}
+                                        {% endfor %}
+                                      </ul>
+                                    </td>
+                                  </tr>
+                                {% endif %}
+                                {% if test.executor %}
+                                  <tr>
+                                    <th scope="row">Executor</th>
+                                    <td>
+                                      <ul class="list-unstyled">
+                                        {% if test.executor.name %}
+                                          <li>
+                                            <strong>Name:</strong> {{ test.executor.name|markdown|safe }}
+                                          </li>
+                                        {% endif %}
+                                        {% if test.executor.elevation_required %}
+                                          <li>
+                                            <strong>Elevation required:</strong> {{ test.executor.elevation_required|markdown|safe }}
+                                          </li>
+                                        {% endif %}
+                                        {% if test.executor.command %}
+                                          <li>
+                                            <strong>Command:</strong> {{ test.executor.command|markdown|safe }}
+                                          </li>
+                                        {% endif %}
+                                        {% if test.executor.cleanup_command %}
+                                          <li>
+                                            <strong>Cleanup Command:</strong> {{ test.executor.cleanup_command|markdown|safe }}
+                                          </li>
+                                        {% endif %}
+                                      </ul>
+                                    </td>
+                                  </tr>
+                                {% endif %}
+                                <a href="https://github.com/redcanaryco/atomic-red-team/tree/master/atomics/{{ technique.technique_id }}/" target="_blank" class="btn btn-primary">
+                                  View in Atomic Red Team github
+                                  <span class="material-icons">launch</span>
+                                </a>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+  </div>
+</div>

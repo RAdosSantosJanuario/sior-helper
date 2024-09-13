@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <title>
+      {% block title %}
+        SIOR
+      {% endblock %}
+    </title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.0.7/b-3.0.2/b-colvis-3.0.2/b-html5-3.0.2/b-print-3.0.2/date-1.5.2/fc-5.0.0/fh-4.0.1/kt-2.12.0/r-3.0.2/rg-1.5.0/rr-1.5.0/sc-2.4.2/sb-1.7.1/sp-2.3.1/sl-2.0.1/datatables.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.compat.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.0.7/b-3.0.2/b-colvis-3.0.2/b-html5-3.0.2/b-print-3.0.2/date-1.5.2/fc-5.0.0/fh-4.0.1/kt-2.12.0/r-3.0.2/rg-1.5.0/rr-1.5.0/sc-2.4.2/sb-1.7.1/sp-2.3.1/sl-2.0.1/datatables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdn.datatables.net/plug-ins/1.11.4/sorting/datetime-moment.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  </head>
+  <body>
+    <header>
+      <!-- Header Content -->
+      <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top" style="padding-left: 25px; padding-right: 25px;">
+        <a class="navbar-brand" href="/dashboard">S10R - Detections and Responses for SIEM and SOAR</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"><i class="material-icons">menu</i></button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+              <li class="nav-item active">
+                <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+              </li>
+              <li class="nav-item active">
+                <a class="nav-link" href="{{ url_for('about_sior') }}">About SIOR</a>
+              </li>
+              {% if current_user.is_authenticated and current_user.admin %}
+                <li class="nav-item">
+                  <a href="#" id="taskListToggle" class="nav-link" data-bs-toggle="modal" data-bs-target="#taskListModal">Queue <span id="queueCount" class="badge bg-primary"></span></a>
+                </li>
+              {% endif %}
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+              {% if current_user.is_authenticated %}
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                      <span class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">{{ current_user.username }}</span>
+                      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
+                        {% if current_user.admin %}
+                          <li>
+                            <span class="dropdown-item cursor-pointer" id="runCache">Update Cache</span>
+                          </li>
+                        {% endif %}
+                        <li>
+                          <a class="dropdown-item" href="{{ url_for('change_password') }}">Change Password</a>
+                        </li>
+                        <li>
+                          <a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a>
+                        </li>
+                      </ul>
+                    </li>
+                </ul>
+              {% else %}
+                <ul class="navbar-nav me-auto">
+                  <li class="nav-item">
+                    <a href="{{ url_for('login') }}" class="nav-link">Login</a>
+                  </li>
+                </ul>
+              {% endif %}
+            </div>
+          </ul>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Loading Spinner -->
+    <div id="loader" class="loader-container" style="display: none;">
+      <div class="spinner-border text-primary loader-spinner" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <!-- Task List Modal -->
+    <div class="modal fade" id="taskListModal" tabindex="-1" aria-labelledby="taskListModalLabel" aria-hidden="true">
+      <div class="modal-dialog" style="max-width: 65%;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="taskListModalLabel">Task List</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <table class="table table-striped" style="max-width: 100%;">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>State</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="taskTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-container">
+      <div id="content-wrap" class="content-wrap">
+        {% with messages=get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }}" style="text-align: center;">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        {% block content %}
+
+        {% endblock %}
+      </div>
+      <div id="snackbar"></div>
+      <footer>
+        <p>SIOR - Detections, Responses and Tests for SIEM and SOAR</p>
+      </footer>
+    </div>
+  </body>
+</html>

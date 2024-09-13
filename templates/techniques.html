@@ -1,0 +1,133 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+  Techniques - Detections and Responses for SIEM and SOAR
+{% endblock %}
+
+{% block content %}
+  <div class="content">
+    <div class="container-fluid mt-5 mb-5">
+      <div class="row">
+        <!-- Fixed Sidebar for non-interactive information -->
+        <div class="col-md-3">
+          <div class="card shadow-sm" style="position: fixed; width: 22%; height: 50vh; overflow-y: auto; overflow-x: hidden;">
+            <div class="card-header text-center bg-primary text-white">
+              <h3>Run Details</h3>
+            </div>
+            <div class="card-body">
+              <table class="table table-borderless">
+                <tbody>
+                  <tr>
+                    <th scope="row">Download</th>
+                    <td>
+                      <button class="btn btn-outline-secondary btn-sm downloadRunButton" title="Download the json of this run" data-task-id="{{ data.task_id }}"><i class="material-icons">download</i></button>
+                      <!--<button class="btn btn-outline-secondary btn-sm downloadHeatMapUsageButton" title="Download the heat-map usage in json" data-task-id="{{ data.task_id }}"><i class="material-icons">map</i></button>-->
+                      <button class="btn btn-outline-secondary btn-sm downloadHeatMapButton" title="Download the SIOR-heat-map in json" data-task-id="{{ data.task_id }}"><i class="material-icons">map</i></button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Created</th>
+                    <td>{{ data.created_run }}</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Created By</th>
+                    <td>{{ data.created_by.username }}</td>
+                  </tr>
+                  {% if data.interrelation_keywords_and_groups != 'SINGLE' %}
+                    <tr>
+                      <th scope="row">Association Mode Keywords and Groups</th>
+                      <td>{{ data.interrelation_keywords_and_groups }}</td>
+                    </tr>
+                  {% endif %}
+                  {% if data.keywords %}
+                    <tr>
+                      <th scope="row">Keywords</th>
+                      <td>{{ data.keywords|join(", ") }}</td>
+                    </tr>
+                    {% if data.interrelation_keywords != 'SINGLE' %}
+                      <tr>
+                        <th scope="row">Association Mode Keywords</th>
+                        <td>{{ data.interrelation_keywords }}</td>
+                      </tr>
+                    {% endif %}
+                  {% endif %}
+                  {% if data.groups %}
+                    <tr>
+                      <th scope="row">Groups</th>
+                      <td>{{ data.groups|join(", ") }}</td>
+                    </tr>
+                    {% if data.interrelation_groups != 'SINGLE' %}
+                      <tr>
+                        <th scope="row">Association Mode Groups</th>
+                        <td>{{ data.interrelation_groups }}</td>
+                      </tr>
+                    {% endif %}
+                  {% endif %}
+                  <tr>
+                    <th scope="row">Total Used Techniques</th>
+                    <td>{{ data.stats.total_used_techniques }} / {{ data.stats.all_techniques }}</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Unique Responses</th>
+                    <td>{{ data.stats.unique_responses }}</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Unique Detections</th>
+                    <td>{{ data.stats.unique_detections }}</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Unique Tests</th>
+                    <td>{{ data.stats.unique_tests }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main table area adjusted to accommodate fixed sidebar -->
+        <div class="col-md-9 offset-md-3">
+          <div class="table-responsive">
+            <table id="technique_table" class="table table-hover table-striped">
+              <thead class="table-dark">
+                <tr>
+                  <th>Technique ID</th>
+                  <th>Name</th>
+                  <th>Total Detections</th>
+                  <th>Total Responses</th>
+                  <th>Total Tests</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for technique in data.techniques %}
+                  <tr>
+                    <td>{{ technique.technique_id }}</td>
+                    <td>{{ technique.name }}</td>
+                    <td>{{ technique.stats.total_detections }}</td>
+                    <td>{{ technique.stats.total_responses }}</td>
+                    <td>{{ technique.stats.total_tests }}</td>
+                    <td>
+                      <button class="btn btn-outline-secondary load-details-btn" type="button" data-technique-id="{{ technique.technique_id }}" data-task-id="{{ data.task_id }}"><i class="material-icons" style="font-size: 18px;line-height: unset;">open_in_full</i></button>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal template for each technique -->
+  {% for technique in data.techniques %}
+    <div class="modal fade" id="modal-all-details-{{ technique.technique_id }}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl" role="document">
+        <div id="modal-content-{{ technique.technique_id }}">
+          <!-- Content will be loaded here dynamically -->
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+{% endblock %}

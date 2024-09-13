@@ -1,0 +1,14 @@
+Flask
+redis
+attackcti
+celery
+PyYAML
+markdown2
+beautifulsoup4
+Flask-WTF
+flask-login
+flask-sqlalchemy
+email_validator
+pymysql
+sendgrid
+gunicorn

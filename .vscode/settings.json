@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "./scripts/framework/packages/ATTACK-Python-Client"
+    ]
+}

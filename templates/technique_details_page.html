@@ -1,0 +1,375 @@
+{% extends "layout.html" %}
+
+{% macro render_data(data, part, technique_id, depth=0) %}
+  {% if data is mapping %}
+    <table class="table table-text">
+      <tbody>
+        {% for key, value in data.items() %}
+          {% if value is not none and not (value is iterable and value|length == 0) %}
+            <tr>
+              <th scope="row">{{ key|capitalize }}</th>
+              <td>
+                {% if value is mapping or (value is iterable and value is not string) %}
+                  {{ render_data(value, part, technique_id, depth + 1) }}
+                {% else %}
+                  {{ format_value(value, part) }}
+                {% endif %}
+              </td>
+            </tr>
+          {% endif %}
+        {% endfor %}
+        {% if depth == 0 %}
+          {% if part == 'd3fend' %}
+          <a href="https://d3fend.mitre.org/technique/{{ data.id }}/" target="_blank" class="btn btn-primary view-in-btn">
+            View in MITRE D3FEND
+            <span class="material-icons">launch</span>
+          </a>
+          {% elif part == 'sigma' %}
+          <a href="https://github.com/SigmaHQ/sigma/blob/master/{{ data.file|replace('resources/sigma/', '')|replace('/app/scripts/', '') }}" target="_blank" class="btn btn-primary view-in-btn">
+            View in sigma GitHub
+            <span class="material-icons">launch</span>
+          </a>
+          {% elif part == 'guardsight' %}
+          <a href="https://github.com/guardsight/gsvsoc_cirt-playbook-battle-cards/blob/master/{{ data.title }}.pdf" target="_blank" class="btn btn-primary view-in-btn">
+            View in guardsight GitHub
+            <span class="material-icons">launch</span>
+          </a>
+          {% elif part == 'atomic' %}
+          <a href="https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/{{ technique_id }}/{{ technique_id }}.yaml" target="_blank" class="btn btn-primary view-in-btn">
+            View in Atomic Red Team GitHub
+            <span class="material-icons">launch</span>
+          </a>
+          {% endif %}
+        {% endif %}
+      </tbody>
+    </table>
+  {% elif data is iterable and data is not string %}
+    {% if data|length > 0 %}
+      <ul style="list-style-type: none; padding-left: 0;">
+        {% for item in data %}
+          {% if item is not none %}
+            {% if item is mapping or (item is iterable and item is not string) %}
+              <li>{{ render_data(item, part, technique_id, depth + 1) }}</li>
+            {% else %}
+              <li style="list-style-type: disc; margin-left: {{ depth * 20 }}px;">{{ format_value(item, part) }}</li>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% else %}
+    {{ format_value(data, part) }}
+  {% endif %}
+{% endmacro %}
+
+{% macro format_value(value, part) %}
+  {% if part in ['atomic', 'sigma'] and value is string and 'http' not in value %}
+    {{ value|markdown|safe }}
+  {% else %}
+    {{ value|safe }}
+  {% endif %}
+{% endmacro %}
+
+{% block content %}
+  <div class="content">
+    <a href="{{ url_for('display_techniques', task_id=technique_data.metadata.task_id) }}" class="back-button">
+        <button>&larr; Back to all techniques</button>
+    </a>
+    <div class="header mb-4">
+      <h1 class="display-4" style="font-size: 3rem;margin-bottom: 1rem;">Details for {{ technique_data.technique.name }}</h1>
+    </div>
+    <div class="container-fluid mt-3">
+      <div class="row">
+        <!-- Fixed Sidebar for non-interactive information -->
+        <div class="col-md-3" style="max-width: 300px;">
+          {% if technique_data.metadata %}
+          <div class="card shadow-sm" style="position: fixed; width: 300px; height: 30vh; overflow-y: auto; overflow-x: hidden;">
+              <div class="card-header text-center bg-primary text-white">
+                  <h3>Run Details</h3>
+              </div>
+              <div class="card-body">
+                  <table class="table table-borderless">
+                      <tbody>
+                          <tr>
+                              <th scope="row">Download</th>
+                              <td>
+                                  <button class="btn btn-outline-secondary btn-sm downloadRunButton" title="Download the json of this run" data-task-id="{{ technique_data.metadata.task_id }}"><i class="material-icons">download</i></button>
+                                  <button class="btn btn-outline-secondary btn-sm downloadHeatMapButton" title="Download the SIOR-heat-map in json" data-task-id="{{ technique_data.metadata.task_id }}"><i class="material-icons">map</i></button>
+                              </td>
+                          </tr>
+                          <tr>
+                              <th scope="row">Created</th>
+                              <td>{{ technique_data.metadata.created_run }}</td>
+                          </tr>
+                          <tr>
+                              <th scope="row">Created By</th>
+                              <td>{{ technique_data.metadata.created_by.username }}</td>
+                          </tr>
+                          {% if technique_data.metadata.interrelation_keywords_and_groups != 'SINGLE' %}
+                          <tr>
+                              <th scope="row">Association Mode Keywords and Groups</th>
+                              <td>{{ technique_data.metadata.interrelation_keywords_and_groups }}</td>
+                          </tr>
+                          {% endif %}
+                          {% if technique_data.metadata.keywords %}
+                          <tr>
+                              <th scope="row">Keywords</th>
+                              <td>{{ technique_data.metadata.keywords|join(", ") }}</td>
+                          </tr>
+                          {% if technique_data.metadata.interrelation_keywords != 'SINGLE' %}
+                          <tr>
+                              <th scope="row">Association Mode Keywords</th>
+                              <td>{{ technique_data.metadata.interrelation_keywords }}</td>
+                          </tr>
+                          {% endif %}
+                          {% endif %}
+                          {% if technique_data.metadata.groups %}
+                          <tr>
+                              <th scope="row">Groups</th>
+                              <td>{{ technique_data.metadata.groups|join(", ") }}</td>
+                          </tr>
+                          {% if technique_data.metadata.interrelation_groups != 'SINGLE' %}
+                          <tr>
+                              <th scope="row">Association Mode Groups</th>
+                              <td>{{ technique_data.metadata.interrelation_groups }}</td>
+                          </tr>
+                          {% endif %}
+                          {% endif %}
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+          {% endif %}
+
+          <!-- Technique Details -->
+          <div class="card shadow-sm" style="position: fixed; width: 300px; height: auto; overflow-y: auto; overflow-x: hidden; margin-top: {% if technique_data.metadata %}32vh{% else %}0{% endif %};">
+              <div class="card-header text-center bg-primary text-white">
+                  <h3>Technique Details</h3>
+              </div>
+              <div class="card-body">
+              <table class="table table-borderless">
+                    <tbody>
+                        <tr>
+                            <th scope="row">Name</th>
+                            <td>{{ technique_data.technique.name }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">ID</th>
+                            <td>{{ technique_data.technique.technique_id }}</td>
+                        </tr>
+                        {% if technique_data.technique.parent_id %}
+                        <tr>
+                            <th scope="row">Parent ID</th>
+                            <td>{{ technique_data.technique.parent_id }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if technique_data.technique.kill_chain_phases|length > 0 %}
+                        <tr>
+                            <th scope="row">Phases</th>
+                            <td>
+                                <ul style="list-style: none;padding-left: 0;">
+                                    {% for phase in technique_data.technique.kill_chain_phases %}
+                                    {% if phase.kill_chain_name %}
+                                    <li class="table-text">
+                                        {{ phase.phase_name }}
+                                    </li>
+                                    {% endif %}
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <td colspan="2">
+                                <a href="https://attack.mitre.org/techniques/{{ technique_data.technique.technique_id|replace('.', '/') }}/" target="_blank" class="btn btn-primary btn-block">
+                                    View in MITRE ATT&CK
+                                    <span class="material-icons">launch</span>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+              </table>
+          </div>
+        </div>
+        </div>
+
+        <!-- Main content area adjusted to accommodate fixed sidebar -->
+        <div class="col-md-9 offset-md-3">
+            <div class="body technique-details">
+              <!-- Nav tabs -->
+              <ul class="nav nav-tabs" id="detailTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link active" id="{{ technique_data.technique.technique_id }}-info-tab" data-bs-toggle="tab" data-bs-target="#{{ technique_data.technique.technique_id }}-info" type="button" role="tab" aria-controls="{{ technique_data.technique.technique_id }}-info" aria-selected="true">ATT&CK Technique Info <span class="material-icons">info</span></button>
+                </li>
+                {% for key in ['sigma', 'att&ck', 'd3fend', 'guardsight'] %}
+                  {% if technique_data.technique.detections.get(key) %}
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="{{ technique_data.technique.technique_id }}-{{ key }}-detections-tab" data-bs-toggle="tab" data-bs-target="#{{ technique_data.technique.technique_id }}-{{ key }}-detections" type="button" role="tab" aria-controls="{{ technique_data.technique.technique_id }}-{{ key }}-detections" aria-selected="false">{{ key|capitalize }} Detections <span class="material-icons">search</span></button>
+                  </li>
+                  {% endif %}
+                {% endfor %}
+                {% for key in ['d3fend', 'guardsight'] %}
+                  {% if technique_data.technique.responses.get(key) %}
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="{{ technique_data.technique.technique_id }}-{{ key }}-responses-tab" data-bs-toggle="tab" data-bs-target="#{{ technique_data.technique.technique_id }}-{{ key }}-responses" type="button" role="tab" aria-controls="{{ technique_data.technique.technique_id }}-{{ key }}-responses" aria-selected="false">{{ key|capitalize }} Responses <span class="material-icons">shield</span></button>
+                  </li>
+                  {% endif %}
+                {% endfor %}
+                {% for key in ['atomic'] %}
+                  {% if technique_data.technique.tests.get(key) %}
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="{{ technique_data.technique.technique_id }}-{{ key }}-tests-tab" data-bs-toggle="tab" data-bs-target="#{{ technique_data.technique.technique_id }}-{{ key }}-tests" type="button" role="tab" aria-controls="{{ technique_data.technique.technique_id }}-{{ key }}-tests" aria-selected="false">{{ key|capitalize }} Tests <span class="material-icons">safety_check</span></button>
+                  </li>
+                  {% endif %}
+                {% endfor %}
+              </ul>
+
+              <!-- Tab content -->
+              <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="{{ technique_data.technique.technique_id }}-info" role="tabpanel" aria-labelledby="{{ technique_data.technique.technique_id }}-info-tab">
+                  <div class="card">
+                    <div class="card-body">
+                      <table class="table table-text">
+                        <tbody>
+                          <tr>
+                            <th scope="row">Description</th>
+                            <td>{{ technique_data.technique.description|markdown|safe }}</td>
+                          </tr>
+                          {% if technique_data.technique.usage_references|length > 0 %}
+                            <tr>
+                              <th scope="row">Usage References</th>
+                              <td>
+                                <ul class="list-unstyled">
+                                  {% for reference in technique_data.technique.usage_references %}
+                                    <li class="table-text">
+                                    {% if reference.url %}
+                                      {{ reference.url|markdown|safe }}
+                                    {% elif reference.description%}
+                                      {{ reference.description|markdown|safe }}
+                                    {% elif reference.external_id %}
+                                      {{ reference.external_id }}
+                                    {% endif %}
+                                    </li>
+                                  {% endfor %}
+                                </ul>
+                              </td>
+                            </tr>
+                          {% endif %}
+                          {% if technique_data.technique.group_references|length > 0 %}
+                            <tr>
+                              <th scope="row">Group References</th>
+                              <td>
+                                <ul class="list-unstyled">
+                                  {% for reference in technique_data.technique.group_references %}
+                                    <li class="table-text">
+                                      {% if reference.url %}
+                                        {{ reference.url|markdown|safe }}
+                                      {% elif reference.description %}
+                                        {{ reference.description|markdown|safe }}
+                                      {% elif reference.external_id %}
+                                        {{ reference.external_id }}
+                                      {% endif %}
+                                    </li>
+                                  {% endfor %}
+                                </ul>
+                              </td>
+                            </tr>
+                          {% endif %}
+                          {% if technique_data.technique.all_references|length > 0 %}
+                            <tr>
+                              <th scope="row">Other References</th>
+                              <td>
+                                <ul class="list-unstyled">
+                                  {% for reference in technique_data.technique.all_references %}
+                                    <li class="table-text">
+                                      {% if reference.url %}
+                                        {{ reference.url|markdown|safe }}
+                                      {% elif reference.description %}
+                                        {{ reference.description|markdown|safe }}
+                                      {% elif reference.external_id %}
+                                        {{ reference.external_id }}
+                                      {% endif %}
+                                    </li>
+                                  {% endfor %}
+                                </ul>
+                              </td>
+                            </tr>
+                          {% endif %}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                {% for key in ['sigma', 'att&ck', 'd3fend', 'guardsight'] %}
+                  {% if technique_data.technique.detections.get(key) %}
+                  <div class="tab-pane fade" id="{{ technique_data.technique.technique_id }}-{{ key }}-detections" role="tabpanel" aria-labelledby="{{ technique_data.technique.technique_id }}-{{ key }}-detections-tab">
+                    <div class="accordion" id="accordion-{{ technique_data.technique.technique_id }}-{{ key }}">
+                      {% for detection in technique_data.technique.detections[key] %}
+                        <div class="accordion-item">
+                          <h2 class="accordion-header" id="heading-{{ technique_data.technique.technique_id }}-{{ detection.id | replace(' ', '-') }}">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ technique_data.technique.technique_id }}-{{ detection.id | replace(' ', '-') }}" aria-expanded="false" aria-controls="collapse-{{ technique_data.technique.technique_id }}-{{ detection.id | replace(' ', '-') }}">
+                              {{ detection.title }}
+                            </button>
+                          </h2>
+                          <div id="collapse-{{ technique_data.technique.technique_id }}-{{ detection.id | replace(' ', '-') }}" class="accordion-collapse collapse" aria-labelledby="heading-{{ technique_data.technique.technique_id }}-{{ detection.id | replace(' ', '-') }}" data-bs-parent="#accordion-{{ technique_data.technique.technique_id }}-{{ key }}">
+                            <div class="accordion-body">
+                              {{ render_data(detection, key, technique_data.technique.technique_id) }}
+                            </div>
+                          </div>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                  {% endif %}
+                {% endfor %}
+                {% for key in ['d3fend', 'guardsight'] %}
+                  {% if technique_data.technique.responses.get(key) %}
+                  <div class="tab-pane fade" id="{{ technique_data.technique.technique_id }}-{{ key }}-responses" role="tabpanel" aria-labelledby="{{ technique_data.technique.technique_id }}-{{ key }}-responses-tab">
+                    <div class="accordion" id="accordion-{{ technique_data.technique.technique_id }}-{{ key }}">
+                      {% for response in technique_data.technique.responses[key] %}
+                        <div class="accordion-item">
+                          <h2 class="accordion-header" id="heading-{{ technique_data.technique.technique_id }}-{{ response.id | replace(' ', '-') }}">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ technique_data.technique.technique_id }}-{{ response.id | replace(' ', '-') }}" aria-expanded="false" aria-controls="collapse-{{ technique_data.technique.technique_id }}-{{ response.id | replace(' ', '-') }}">
+                              {{ response.id }}
+                            </button>
+                          </h2>
+                          <div id="collapse-{{ technique_data.technique.technique_id }}-{{ response.id | replace(' ', '-') }}" class="accordion-collapse collapse" aria-labelledby="heading-{{ technique_data.technique.technique_id }}-{{ response.id | replace(' ', '-') }}" data-bs-parent="#accordion-{{ technique_data.technique.technique_id }}-{{ key }}">
+                            <div class="accordion-body">
+                              {{ render_data(response, key, technique_data.technique.technique_id) }}
+                            </div>
+                          </div>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                  {% endif %}
+                {% endfor %}
+                {% for key in ['atomic'] %}
+                  {% if technique_data.technique.tests.get(key) %}
+                    <div class="tab-pane fade" id="{{ technique_data.technique.technique_id }}-{{ key }}-tests" role="tabpanel" aria-labelledby="{{ technique_data.technique.technique_id }}-{{ key }}-tests-tab">
+                      <div class="accordion" id="accordion-{{ technique_data.technique.technique_id }}-{{ key }}">
+                        {% for test in technique_data.technique.tests[key] %}
+                          <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading-{{ technique_data.technique.technique_id }}-{{ test.id | replace(' ', '-') }}">
+                              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ technique_data.technique.technique_id }}-{{ test.id | replace(' ', '-') }}" aria-expanded="false" aria-controls="collapse-{{ technique_data.technique.technique_id }}-{{ test.id | replace(' ', '-') }}">
+                                {{ test.title }}
+                              </button>
+                            </h2>
+                            <div id="collapse-{{ technique_data.technique.technique_id }}-{{ test.id | replace(' ', '-') }}" class="accordion-collapse collapse" aria-labelledby="heading-{{ technique_data.technique.technique_id }}-{{ test.id | replace(' ', '-') }}" data-bs-parent="#accordion-{{ technique_data.technique.technique_id }}-{{ key }}">
+                              <div class="accordion-body">
+                                {{ render_data(test, key, technique_data.technique.technique_id) }}
+                              </div>
+                            </div>
+                          </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

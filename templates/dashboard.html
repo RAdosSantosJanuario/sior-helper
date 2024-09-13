@@ -1,0 +1,136 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+  Dashboard - SIOR
+{% endblock %}
+
+{% block content %}
+  <div class="content">
+    <div class="container mb-5">
+      <!-- How to Use Card -->
+      <div class="card shadow-sm mb-4" style="flex-grow: 1; margin-right: 20px;">
+        <div class="card-header text-center bg-primary text-white">
+          <h3>How To Use</h3>
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled">
+            <li class="mb-2">1. Enter keywords and groups in the input fields.</li>
+            <li class="mb-2">
+              2. Select the association mode (<strong>AND</strong>/<strong>OR</strong>) to define how keywords and groups should be related.
+            </li>
+            <li class="mb-2">3. Review the file modification time for the cache status.</li>
+            <li class="mb-2">
+              4. Click the <strong>Play</strong> button to run the script with the specified settings.
+            </li>
+            <li class="mb-2">5. Check the table below for evaluation results and available actions.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Form for keyword input and settings -->
+      <div class="flex-fill ml-3 form-container">
+        {% if not current_user.is_authenticated %}
+          <div class="overlay">
+            <div class="overlay-content">
+              <p>
+                Please <a href="{{ url_for('login') }}">log in</a> to start your own evaluation.
+              </p>
+            </div>
+          </div>
+        {% endif %}
+        <form class="run-script-form" id="scriptForm" action="{{ url_for('run_script') }}" method="post">
+          <div class="card p-3 mb-3">
+            <label class="form-label">Keyword and Group Association Mode:</label>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="interrelation_keywords_and_groups" id="keywordAndGroupAndMode" value="AND" checked />
+              <label class="form-check-label" for="keywordAndGroupAndMode">AND</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="interrelation_keywords_and_groups" id="keywordAndGroupOrMode" value="OR" />
+              <label class="form-check-label" for="keywordAndGroupOrMode">OR</label>
+            </div>
+          </div>
+          <div>
+            <div class="card p-3 mb-3" id="keywordInputSection">
+              <label for="keywords_input" class="form-label">Keywords:</label>
+              <select class="form-control keywords-select" id="keywords_input" multiple="multiple" name="keywords_input"></select>
+            </div>
+
+            <div class="card p-3 mb-3 active animated fadeInDown faster" id="keywordAssociationModeSection" style="display: none;">
+              <label class="form-label">Keyword Association Mode:</label>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="interrelation_keywords" id="keywordAndMode" value="AND" checked />
+                <label class="form-check-label" for="keywordAndMode">AND</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="interrelation_keywords" id="keywordOrMode" value="OR" />
+                <label class="form-check-label" for="keywordOrMode">OR</label>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card p-3 mb-3" id="groupSelectSection">
+              <label for="groupSelect" class="form-label">Groups:</label>
+              <select class="form-control" id="groupSelect" name="groupSelect" multiple="multiple"></select>
+            </div>
+
+            <div class="card p-3 mb-3 active animated fadeInDown faster" id="groupAssociationModeSection" style="display: none;">
+              <label class="form-label">Group Association Mode:</label>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="interrelation_groups" id="groupAndMode" value="AND" checked />
+                <label class="form-check-label" for="groupAndMode">AND</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="interrelation_groups" id="groupOrMode" value="OR" />
+                <label class="form-check-label" for="groupOrMode">OR</label>
+              </div>
+            </div>
+          </div>
+          <p id="fileModTime" class="text-center text-muted" style="font-size: 0.8rem;">No cache available</p>
+
+          <div class="d-flex justify-content-center mb-3">
+            <button id="submitRun" type="submit" class="btn btn-primary me-2"><i class="material-icons" style="vertical-align: middle;">play_arrow</i> Run</button>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary"><i class="material-icons" style="vertical-align: middle;">refresh</i> Reset</a>
+          </div>
+        </form>
+      </div>
+    </div>
+    <table id="evaluation_table" class="display custom-table">
+      <thead>
+        <tr>
+          <th>Created</th>
+          <th>Created By</th>
+          <th>Mode Keywords and Groups</th>
+          <th>Keywords</th>
+          <th>Mode Keywords</th>
+          <th>Groups</th>
+          <th>Mode Groups</th>
+          <th>Techniques</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirmationModalLabel">Confirm Action</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>
+            An existing run with the same keywords, associated mode for keywords, groups and associated mode for groups was found, created on <span id="existingRunDate"></span>. Do you want to proceed?
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="confirmRun">Proceed</button>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
