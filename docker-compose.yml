@@ -1,0 +1,133 @@
+services:
+  db:
+    image: mysql:5.7
+    command: --explicit_defaults_for_timestamp=1 --tls_version=TLSv1.2,TLSv1.3
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "3306:3306"
+    restart: always
+    networks:
+      - internal
+
+  web:
+    build:
+      context: .
+    environment:
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
+      - PYTHONUNBUFFERED=1
+      - APP_SECRET_KEY=${APP_SECRET_KEY}
+      - SECURITY_PASSWORD_SALT=${SECURITY_PASSWORD_SALT}
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_HOST=db
+      - MYSQL_PORT=3306
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - RECAPTCHA_PUBLIC_KEY=${RECAPTCHA_PUBLIC_KEY}
+      - RECAPTCHA_PRIVATE_KEY=${RECAPTCHA_PRIVATE_KEY}
+    depends_on:
+      - db
+      - redis
+      - worker
+    networks:
+      - internal
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+      - cache:/app/scripts/framework/cache
+      - output:/app/scripts/framework/output
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    user: worker_user
+
+  worker:
+    build:
+      context: .
+    command: celery -A app.celery worker --loglevel=info
+    environment:
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
+      - PYTHONUNBUFFERED=1
+      - APP_SECRET_KEY=${APP_SECRET_KEY}
+      - SECURITY_PASSWORD_SALT=${SECURITY_PASSWORD_SALT}
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_HOST=db
+      - MYSQL_PORT=3306
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - RECAPTCHA_PUBLIC_KEY=${RECAPTCHA_PUBLIC_KEY}
+      - RECAPTCHA_PRIVATE_KEY=${RECAPTCHA_PRIVATE_KEY}
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - .:/app
+      - ./data:/app/data
+      - cache:/app/scripts/framework/cache
+      - output:/app/scripts/framework/output
+    networks:
+      - internal
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - internal
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    command: redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - webroot:/var/www/html
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - ./data/certbot/conf:/etc/letsencrypt:ro
+    networks:
+      - internal
+    depends_on:
+      - web
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - webroot:/var/www/html
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    networks:
+      - internal
+    depends_on:
+      - nginx
+
+volumes:
+  redis_data:
+  db_data:
+  webroot:
+  cache:
+  output:
+
+networks:
+  internal:

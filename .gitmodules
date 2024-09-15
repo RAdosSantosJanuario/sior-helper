@@ -1,0 +1,12 @@
+[submodule "scripts/resources/atomic-red-team"]
+	path = scripts/resources/atomic-red-team
+	url = git@github.com:redcanaryco/atomic-red-team.git
+[submodule "scripts/resources/sigma"]
+	path = scripts/resources/sigma
+	url = git@github.com:SigmaHQ/sigma.git
+[submodule "scripts/resources/gsvsoc_cirt-playbook-battle-cards"]
+	path = scripts/resources/gsvsoc_cirt-playbook-battle-cards
+	url = git@github.com:guardsight/gsvsoc_cirt-playbook-battle-cards.git
+[submodule "scripts/resources/cti"]
+	path = scripts/resources/cti
+	url = git@github.com:mitre/cti.git

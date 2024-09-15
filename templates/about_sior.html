@@ -1,0 +1,61 @@
+{% extends 'layout.html' %}
+
+{% block title %}About SIOR - SIOR{% endblock %}
+
+{% block content %}
+<div class="container" style="margin-top: 50px;">
+    <h1>Welcome to SIOR</h1>
+        <p>This dashboard helps you create, verify, and review your SIEM and SOAR configurations by providing information on detections, responses, and tests for specific groups and/or keywords.</p>
+
+    <section class="mb-5">
+        <h2>Features</h2>
+            <h3>Data Integration</h3>
+                <p>Pulls data from <a href="https://attack.mitre.org/" target="_blank">MITRE ATT&CK</a>, <a href="https://d3fend.mitre.org/" target="_blank">MITRE D3FEND</a>, <a href="https://github.com/SigmaHQ/sigma" target="_blank">Sigma</a>, <a href="https://github.com/guardsight/gsvsoc_cirt-playbook-battle-cards" target="_blank">Guardsights Cyber Incident Response Playbook Battle Cards</a>, and the <a href="https://github.com/redcanaryco/atomic-red-team" target="_blank">Atomic Red Team Atomics</a> and maps it to MITRE ATT&CK techniques.</p>
+                
+            <h3>Advanced Search</h3>
+                <p>Uses keywords and/or groups with AND/OR logic to refine searches related to attack techniques.</p>
+                <p>You can also combine (AND, OR) keywords with groups for your search.</p>
+    </section>
+
+    <section class="mb-5">
+        <h2>Example Use Case</h2>
+            <p>Here is how the framework helps an <a href="https://www.elastic.co/de/elastic-stack" target="_blank">Elastic Stack</a> detect a potential persistence attempt using the Registry Run Keys / Startup Folder technique:</p>
+        
+            <div class="about-content">
+                <h3>Context</h3>
+                    <img class="mt-3 mb-1" src="{{ url_for('static', filename='images/about_sior/dashboard_view_apt18_apt28.png') }}" alt="Dashboard view APT18 and APT28">
+                    <p>
+                        If you know that the APT18 and APT28 hacker groups could potentially attack your organisation because you work for the government (e.g. <a href="https://www.bsi.bund.de/DE/Themen/Unternehmen-und-Organisationen/Cyber-Sicherheitslage/Analysen-und-Prognosen/Threat-Intelligence/Aktive_APT-Gruppen/aktive-apt-gruppen_node.html">BSI information</a>),
+                        you could check for specific MITRE ATT&CK techniques that could be related to these two groups. 
+                    </p>
+                    <img class="mt-3 mb-1" src="{{ url_for('static', filename='images/about_sior/techniques_view.png') }}" alt="Techniques view">
+                    <p>
+                        Your starting point could be any of the techniques.
+                    </p>
+            </div>
+        
+            <div class="about-content">
+                <h3>SIEM Rule Created</h3>
+                    <img class="mt-3 mb-1" src="{{ url_for('static', filename='images/about_sior/registry_run_keys_startup_folder_details.png') }}" alt="Details for Registry Run Keys / Startup Folder">
+                    The information from sigma tells us to create a rule that checks events from the command line containing all the given entries. 
+
+                    <img class="mt-3 mb-1" src="{{ url_for('static', filename='images/about_sior/kibana_startup_folder_rule.png') }}" alt="Kibana Registry Run Keys / Startup Folder rule">
+                    This results in the following kibana rule:
+                    <code>winlog.event_data.CommandLine : *reg* and winlog.event_data.CommandLine : *ADD* and winlog.event_data.CommandLine : *SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run*</code>
+            </div>
+            <div class="about-content">
+                <h3>SIEM Alert Triggered</h3>
+                    <p>A PowerShell command was executed on a Windows Server 2019 to add a registry key: <code>REG ADD "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /V "Atomic Red Team" /t REGSZ /F /D "#{commandto_execute}"</code></p>
+                    <img class="mt-3 mb-1" src="{{ url_for('static', filename='images/about_sior/kibana_startup_folder_alert.png') }}" alt="Kibana Registry Run Keys / Startup Folder alert">
+                    <p>The SIEM rule detected this activity and triggered the SOAR response to investigate and mitigate the potential threat.</p>
+            </div>
+    </section>
+
+    <section class="mb-5">
+        <h2>Contact Support</h2>
+            <p>If you have any problems or questions, please contact me by email:</p>
+            <button class="btn btn-outline-secondary" id="show-email-btn" style="color: #000;">Show Email</button>
+            <p id="email" style="display:none;"></p>
+    </section>
+</div>
+{% endblock %}
