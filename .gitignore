@@ -4,13 +4,9 @@ docker-compose.yml
 .env
 data/*
 
-<<<<<<< HEAD
-=======
 # vscode
 .vscode
 
-
->>>>>>> e28bc038cc45daf619584771509f8a9532c9497d
 # sior-helper specific
 *.conf
 

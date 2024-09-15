@@ -678,8 +678,8 @@ def process_json_file(file, all_techniques):
     }
 
     # Create a set of technique IDs from the imported JSON file
-    imported_technique_ids = {technique["technique_id"] for technique in file.get("techniques", [])}
-
+    imported_technique_ids = {technique.get("technique_id") for technique in file.get("techniques", []) if "technique_id" in technique}
+    
     total_elements = len(file.get("keywords", [])) + len(file.get("groups", []))
 
     # Process each technique in the imported file
