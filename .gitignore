@@ -5,7 +5,7 @@ docker-compose.yml
 data/*
 
 # sior-helper specific
-nginx.conf
+*.conf
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
