@@ -687,7 +687,7 @@ def process_json_file(file, all_techniques):
         technique_id = technique.get("technique_id")
         
         if not technique_id:
-            app_logger.warning(f"Could not find technique_id for {technique}")
+            app_logger.warning(f"Could not find technique_id for {technique.keys()}")
             continue
 
         if technique_id in techniques_count:
