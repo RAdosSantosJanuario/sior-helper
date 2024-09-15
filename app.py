@@ -828,7 +828,7 @@ def download_heatmap_usage(task_id):
     
     full_techniques = []
     for technique in techniques:
-        full_techniques.append(get_technique_by_id(technique['technique_id'], task_id))
+        full_techniques.append(get_technique_data_by_id(technique['technique_id'], task_id))
     
     full_data['techniques'] = full_techniques
     all_techniques = fetch_all_techniques()
@@ -856,7 +856,7 @@ def download_heatmap(task_id):
     
     full_techniques = []
     for technique in techniques:
-        full_techniques.append(get_technique_by_id(technique['technique_id'], task_id))
+        full_techniques.append(get_technique_data_by_id(technique['technique_id'], task_id))
     
     full_data['techniques'] = full_techniques
     all_techniques = fetch_all_techniques()
