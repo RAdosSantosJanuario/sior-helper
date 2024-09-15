@@ -684,7 +684,11 @@ def process_json_file(file, all_techniques):
 
     # Process each technique in the imported file
     for technique in file.get("techniques", []):
-        technique_id = technique["technique_id"]
+        technique_id = technique.get("technique_id")
+        
+        if not technique_id:
+            app_logger.warning(f"Could not find technique_id for {technique}")
+            continue
 
         if technique_id in techniques_count:
             techniques_count[technique_id]["count"] += 1
