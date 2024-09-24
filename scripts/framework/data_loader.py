@@ -5,7 +5,7 @@ import glob
 import os
 from attackcti import attack_client
 from typing import Dict, Any, List
-from config import TECH_PATH, RELATIONS_PATH, GROUPS_PATH, MIT_PATH, SIGMA_RULES_PATH, SIGMA_RULES_FOLDER, GUARDSIGHT_RESPONSES_PATH, GUARDSIGHT_RESPONSES_FOLDER, ATOMIC_TEST_PATH, ATOMIC_FOLDER
+from config import TECH_PATH, RELATIONS_PATH, GROUPS_PATH, MIT_PATH, D3FEND_PATH, SIGMA_RULES_PATH, SIGMA_RULES_FOLDER, GUARDSIGHT_RESPONSES_PATH, GUARDSIGHT_RESPONSES_FOLDER, ATOMIC_TEST_PATH, ATOMIC_FOLDER
 from utils import markdown_to_html, extract_data_from_markdown, format_markdown_link
 
 logger = logging.getLogger(__name__)
@@ -73,6 +73,24 @@ def load_groups(no_cache: bool) -> List[Dict[str, Any]]:
             exit(2)
 
 def load_mitigations(no_cache: bool) -> List[Dict[str, Any]]:
+    if os.path.exists(MIT_PATH) and not no_cache:
+        logger.info("Loading mitigations from local JSON file.")
+        return load_json(MIT_PATH)
+    else:
+        logger.info("Retrieving all mitigations from ATT&CK server")
+        try:
+            lift = attack_client()
+            all_mitigations = lift.get_mitigations()
+            all_mitigations = serialize_mitigations(all_mitigations)
+            with open(MIT_PATH, 'w+') as json_file:
+                json.dump(all_mitigations, json_file)
+            logger.info(f"Mitigations saved to {MIT_PATH}")
+            return all_mitigations
+        except Exception as e:
+            logger.error(f"Could not download mitigations from ATT&CK server: {str(e)}")
+            exit(2)
+            
+def load_d3fend_techniques(no_cache: bool) -> List[Dict[str, Any]]:
     if os.path.exists(MIT_PATH) and not no_cache:
         logger.info("Loading mitigations from local JSON file.")
         return load_json(MIT_PATH)

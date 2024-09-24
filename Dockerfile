@@ -1,4 +1,4 @@
-FROM python:3.9-slim
+FROM python:3.12.6-slim
 
 RUN adduser --disabled-password --gecos '' worker_user
 
