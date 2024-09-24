@@ -8,7 +8,7 @@ This image does not show the mysql components
 
 ## Deployment
 To deploy the sior-helper you need to make sure to create a .env-file with the following attributes
-# .env file
+### .env file
 - DOCKER_BUILDKIT -> should be 1
 - APP_SECRET_KEY -> secret key
 - SECURITY_PASSWORD_SALT -> Salt for security
@@ -26,3 +26,7 @@ To deploy the sior-helper you need to make sure to create a .env-file with the f
 
 If you want to use the nginx part, you will need to create your own nginx.conf file.
 If you don't need it, you should remove the nginx service from docker-compose.yml.
+
+
+## Considerations
+This is only a proof of concept and should not be used in production. 
