@@ -8,6 +8,15 @@ logger = logging.getLogger(__name__)
 def_tech_descriptions = {}
 
 def map_relationships_to_techniques(techniques: List[Dict[str, Any]], relationships: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Maps relationships to techniques
+
+    Args:
+        techniques (List[Dict[str, Any]]): base technique dictionary
+        relationships (List[Dict[str, Any]]): relationships to be mapped
+
+    Returns:
+        List[Dict[str, Any]]: technique dictionary with mapped relationships
+    """
     logger.info("mapping relationships to att&ck")
     relationship_map = prepare_relationship_mapping(relationships)
     
@@ -33,6 +42,15 @@ def map_relationships_to_techniques(techniques: List[Dict[str, Any]], relationsh
     return techniques
 
 def map_groups_to_techniques(techniques: List[Dict[str, Any]], groups: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Maps groups to techniques
+
+    Args:
+        techniques (List[Dict[str, Any]]): base technique dictionary
+        groups (List[Dict[str, Any]]): groups to be mapped
+
+    Returns:
+        List[Dict[str, Any]]: technique dictionary with mapped groups
+    """
     logger.info("mapping groups to att&ck")
     group_map = {group['id']: group for group in groups}
    
@@ -55,6 +73,15 @@ def map_groups_to_techniques(techniques: List[Dict[str, Any]], groups: List[Dict
     return techniques
 
 def map_mitigations_to_techniques(techniques: List[Dict[str, Any]], mitigations: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Maps mitigations to techniques
+
+    Args:
+        techniques (List[Dict[str, Any]]): base technique dictionary
+        mitigations (List[Dict[str, Any]]): mitigations to be mapped
+
+    Returns:
+        List[Dict[str, Any]]: technique dictionary with mapped mitigations
+    """
     logger.info("mapping mitigations to att&ck")
     mitigation_dict = {mitigation['id']: mitigation for mitigation in mitigations}
 
@@ -68,6 +95,15 @@ def map_mitigations_to_techniques(techniques: List[Dict[str, Any]], mitigations:
     return techniques
 
 def map_sigma_rules_to_techniques(techniques: List[Dict[str, Any]], sigma_rules: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Maps sigma rules to techniques
+
+    Args:
+        techniques (List[Dict[str, Any]]): base technique dictionary
+        sigma_rules (List[Dict[str, Any]]): sigma rules to be mapped
+
+    Returns:
+        List[Dict[str, Any]]: technique dictionary with mapped sigma rules
+    """
     logger.info("mapping sigma to att&ck")
     for technique in techniques:
         for sigma_detection_rule in sigma_rules:
@@ -103,6 +139,15 @@ def map_sigma_rules_to_techniques(techniques: List[Dict[str, Any]], sigma_rules:
     return techniques
 
 def map_atomic_tests_to_techniques(techniques: List[Dict[str, Any]], atomic_tests: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Maps atomic tests to techniques
+
+    Args:
+        techniques (List[Dict[str, Any]]): base technique dictionary
+        atomic_tests (List[Dict[str, Any]]): atomic tests to be mapped
+
+    Returns:
+        List[Dict[str, Any]]: technique dictionary with mapped atomic tests
+    """
     logger.info("mapping atomic to att&ck")
     techniques_by_id = {technique['technique_id']: technique for technique in techniques}
 
@@ -126,6 +171,15 @@ def map_atomic_tests_to_techniques(techniques: List[Dict[str, Any]], atomic_test
     return list(techniques_by_id.values())
 
 def map_guardsight_to_techniques(techniques: List[Dict[str, Any]], guardsight_responses: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Maps iron bow (guardsight) data to techniques
+
+    Args:
+        techniques (List[Dict[str, Any]]): base technique dictionary
+        guardsight_responses (List[Dict[str, Any]]): iron bow (guardsight) data to be mapped
+
+    Returns:
+        List[Dict[str, Any]]: technique dictionary with mapped iron bow (guardsight) data
+    """
     logger.info("mapping guardsight to att&ck")
     techniques_by_id = {technique['technique_id']: technique for technique in techniques}
 
@@ -240,6 +294,14 @@ def map_guardsight_to_techniques(techniques: List[Dict[str, Any]], guardsight_re
     return list(techniques_by_id.values())
 
 def get_description_for_d3fend_technique(def_tech_id):
+    """fetching description for d3fend technique
+
+    Args:
+        def_tech_id (_type_): id of d3fend technique
+
+    Returns:
+        _type_: description of d3fend technique
+    """
     url = f"https://d3fend.mitre.org/api/technique/d3f:{def_tech_id}.json"
     try:
         response = requests.get(url)
@@ -250,6 +312,14 @@ def get_description_for_d3fend_technique(def_tech_id):
         return None
 
 def get_d3fend_for_attack_techniques(techniques: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """fetching d3fend techniques for attack techniques. So this function fetches and maps.
+
+    Args:
+        techniques (List[Dict[str, Any]]): attack techniques to be mapped
+
+    Returns:
+        List[Dict[str, Any]]: attack techniques with mapped d3fend techniques
+    """
     logger.info("Loading and mapping d3fend to att&ck")
     global def_tech_descriptions
     for technique in techniques:
@@ -299,6 +369,14 @@ def get_d3fend_for_attack_techniques(techniques: List[Dict[str, Any]]) -> List[D
     return techniques
 
 def filter_attack_techniques_detection(techniques: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """sets d3fend techniques with Detect type as detection in attack technique
+
+    Args:
+        techniques (List[Dict[str, Any]]): attack techniques
+
+    Returns:
+        List[Dict[str, Any]]: attack techniques with mapped d3fend techniques
+    """
     logger.info("extract d3fend detections to att&ck")
     for technique in techniques:
         responses_without_detect = []
@@ -320,6 +398,14 @@ def filter_attack_techniques_detection(techniques: List[Dict[str, Any]]) -> List
 
 
 def map_all_data(data: Dict[str, Any]) -> Dict[str, Any]:
+    """starting all map functions
+
+    Args:
+        data (Dict[str, Any]): loaded data
+
+    Returns:
+        Dict[str, Any]: mapped data
+    """
     techniques = data['techniques']
     techniques = map_relationships_to_techniques(techniques, data['relationships'])
     techniques = map_groups_to_techniques(techniques, data['groups'])
@@ -334,6 +420,14 @@ def map_all_data(data: Dict[str, Any]) -> Dict[str, Any]:
     return techniques
 
 def prepare_relationship_mapping(relationships: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
+    """util function for mapping relationships to techniques
+
+    Args:
+        relationships (List[Dict[str, Any]]): all relationships
+
+    Returns:
+        Dict[str, List[Dict[str, Any]]]: all relationships with relationship ids as keys
+    """
     relationship_map = {}
     for relationship in relationships:
         target_ref = relationship.get("target_ref")

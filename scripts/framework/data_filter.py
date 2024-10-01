@@ -2,6 +2,16 @@ from typing import Dict, Any, List, Optional as OptionalType
 from utils import format_markdown_link
 
 def filter_for_keywords(techniques: List[Dict[str, Any]], keywords: List[str], interrelation: str) -> List[Dict[str, Any]]:
+    """filters techniques for keywords by AND or OR. Searches inside all the references
+
+    Args:
+        techniques (List[Dict[str, Any]]): all mapped techniques
+        keywords (List[str]): keywords to check for
+        interrelation (str): association mode for keywords (AND or OR)
+
+    Returns:
+        List[Dict[str, Any]]: filtered techniques by keywords
+    """
     filtered_techniques = []
     for technique in techniques:
         references = []
@@ -45,6 +55,16 @@ def filter_for_keywords(techniques: List[Dict[str, Any]], keywords: List[str], i
     return filtered_techniques
 
 def filter_for_groups(techniques: List[Dict[str, Any]], groups: List[Dict[str, Any]], interrelation: str) -> List[Dict[str, Any]]:
+    """filters techniques for groups by AND or OR. Searches inside groups list
+
+    Args:
+        techniques (List[Dict[str, Any]]): all mapped techniques
+        groups (List[str]): keywords to check for
+        interrelation (str): association mode for groups (AND or OR)
+
+    Returns:
+        List[Dict[str, Any]]: filtered techniques by groups
+    """
     filtered_techniques = []
     for technique in techniques:
         current_technique_groups = technique.get('group_references', [])
@@ -76,6 +96,16 @@ def add_group_references(technique: Dict[str, Any], matching_groups: List[Dict[s
 def merge_filtered_techniques(filtered_techniques_keywords: List[Dict[str, Any]], 
                               filtered_techniques_groups: List[Dict[str, Any]], 
                               interrelation: str) -> List[Dict[str, Any]]:
+    """filters techniques for keywords and groups by AND or OR. Merges the techniques
+
+    Args:
+        filtered_techniques_keywords (List[Dict[str, Any]]): all filtered and mapped techniques by keywords
+        filtered_techniques_groups (List[Dict[str, Any]]): all filtered and mapped techniques by groups
+        interrelation (str): association mode for merging keywords and groups data
+
+    Returns:
+        List[Dict[str, Any]]: fully merged and mapped techniques
+    """
     dict1 = {obj['id']: obj for obj in filtered_techniques_keywords}
     dict2 = {obj['id']: obj for obj in filtered_techniques_groups}
     

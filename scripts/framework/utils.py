@@ -5,9 +5,22 @@ import re
 import json
 
 def markdown_to_html(markdown_text: str) -> str:
+    """util function to create html out of markdown
+
+    Args:
+        markdown_text (str): data (text) as markdown
+
+    Returns:
+        str: data (text) as html
+    """
     return markdown2.markdown(markdown_text)
 
-def extract_data_from_markdown(md_content):
+def extract_data_from_markdown(md_content: str):
+    """util function to extract data for iron bow (guardsight) data
+
+    Args:
+        md_content (str): data (text) as markdown
+    """
     html_content = markdown2.markdown(md_content)
 
     soup = BeautifulSoup(html_content, 'html.parser')
@@ -67,6 +80,14 @@ def extract_data_from_markdown(md_content):
     return json_data
 
 def format_markdown_link(text):
+    """Trying to create markdown links by searching for links 
+
+    Args:
+        text (_type_): being searched for links
+
+    Returns:
+        _type_: markdown data with links
+    """
     url_pattern = r'https?://[^\s]+'
     
     urls = re.findall(url_pattern, text)
@@ -84,6 +105,14 @@ def format_markdown_link(text):
     return text
 
 def remove_duplicates(items):
+    """util function to remove duplicates
+
+    Args:
+        items (_type_): data with possible duplicates
+
+    Returns:
+        _type_: data without duplicates
+    """
     seen = set()
     unique_items = []
     for item in items:
@@ -94,6 +123,14 @@ def remove_duplicates(items):
     return unique_items
 
 def remove_technique_duplicates(all_techniques):
+    """util function to remove duplicates out of techniques
+
+    Args:
+        all_techniques (_type_): all mapped and filtered techniques
+
+    Returns:
+        _type_: all mapped and filtered techniques without duplicates 
+    """
     for technique in all_techniques:
         for key in ['att&ck', 'd3fend', 'sigma', 'guardsight']:
             if key in technique['detections']:

@@ -2,6 +2,15 @@ from typing import Dict, Any, List
 from collections import defaultdict
 
 def analyze_and_update_techniques(techniques: List[Dict[str, Any]], all_techniques_length: int) -> tuple[Dict[str, Any], List[Dict[str, Any]]]:
+    """extracting statistics for techniques
+
+    Args:
+        techniques (List[Dict[str, Any]]): all mapped and filtered techniques
+        all_techniques_length (int): length of all techniques
+
+    Returns:
+        tuple[Dict[str, Any], List[Dict[str, Any]]]: overall stats and all mapped and filtered techniques with statistics 
+    """
     total_techniques = len(techniques)
     unique_responses = set()
     unique_detections = set()
@@ -47,6 +56,15 @@ def analyze_and_update_techniques(techniques: List[Dict[str, Any]], all_techniqu
     return overall_stats, techniques
 
 def find_color_for_count(colors: Dict[str, Dict[str, str]], count: int) -> str:
+    """util function to find color for a specific count
+
+    Args:
+        colors (Dict[str, Dict[str, str]]): all colors
+        count (int): count
+
+    Returns:
+        str: color for that specific count
+    """
     keys = sorted(int(key) for key in colors if key.isdigit())
     
     selected_key = None

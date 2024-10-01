@@ -24,6 +24,7 @@ GUARDSIGHT_RESPONSES_FOLDER = os.path.join(RES_DIR, 'gsvsoc_cirt-playbook-battle
 ATOMIC_FOLDER = os.path.join(RES_DIR, 'atomic-red-team', 'atomics')
 SIGMA_RULES_FOLDER = os.path.join(RES_DIR, 'sigma', 'rules')
 
+
 def setup_logging():
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',

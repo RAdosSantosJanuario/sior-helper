@@ -52,7 +52,19 @@ def export_data(analyzed_data: Dict[str, Any],
                 no_cache: bool,
                 output_path: OptionalType[str] = None,
                 full_mapping: bool = False):
-    
+    """Exporting data to file
+
+    Args:
+        analyzed_data (Dict[str, Any]): mapped data
+        keywords (OptionalType[List[str]]): keywords
+        groups (OptionalType[List[str]]): groups
+        interrelation_keywords_and_groups (str): association mode for keywords and groups
+        interrelation_keywords (str): association mode for keywords
+        interrelation_groups (str): association mode for groups
+        no_cache (bool): if cache should not be used
+        output_path (OptionalType[str], optional): Path to output file. Defaults to None.
+        full_mapping (bool, optional): If full mapping should be done. Defaults to False.
+    """
     if full_mapping:
         logger.info("Full mapping export")
         output_path = "/app/scripts/framework/cache/full_mapping.json"

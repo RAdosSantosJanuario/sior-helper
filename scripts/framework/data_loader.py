@@ -11,6 +11,14 @@ from utils import markdown_to_html, extract_data_from_markdown, format_markdown_
 logger = logging.getLogger(__name__)
 
 def load_json(file_path: str) -> Dict[str, Any]:
+    """Help function to load json data
+
+    Args:
+        file_path (str): path to file
+
+    Returns:
+        Dict[str, Any]: json data as dictionary
+    """
     try:
         with open(file_path, 'r') as file:
             return json.load(file)
@@ -19,6 +27,14 @@ def load_json(file_path: str) -> Dict[str, Any]:
         return {}
 
 def load_techniques(no_cache: bool) -> List[Dict[str, Any]]:
+    """loading mitre techniques
+
+    Args:
+        no_cache (bool): if cache should not be used
+
+    Returns:
+        List[Dict[str, Any]]: mitre techniques as dictionary
+    """
     if os.path.exists(TECH_PATH) and not no_cache:
         logger.info("Loading techniques from local JSON file.")
         return load_json(TECH_PATH)
@@ -37,6 +53,14 @@ def load_techniques(no_cache: bool) -> List[Dict[str, Any]]:
             exit(2)
 
 def load_relationships(no_cache: bool) -> List[Dict[str, Any]]:
+    """loading mitre relationships
+
+    Args:
+        no_cache (bool): if cache should not be used
+
+    Returns:
+        List[Dict[str, Any]]: mitre relationships as dictionary
+    """
     if os.path.exists(RELATIONS_PATH) and not no_cache:
         logger.info("Loading relationships from local JSON file.")
         return load_json(RELATIONS_PATH)
@@ -55,6 +79,14 @@ def load_relationships(no_cache: bool) -> List[Dict[str, Any]]:
             exit(2)
 
 def load_groups(no_cache: bool) -> List[Dict[str, Any]]:
+    """loading mitre groups
+
+    Args:
+        no_cache (bool): if cache should not be used
+
+    Returns:
+        List[Dict[str, Any]]: mitre groups as dictionary
+    """
     if os.path.exists(GROUPS_PATH) and not no_cache:
         logger.info("Loading groups from local JSON file.")
         return load_json(GROUPS_PATH)
@@ -73,6 +105,14 @@ def load_groups(no_cache: bool) -> List[Dict[str, Any]]:
             exit(2)
 
 def load_mitigations(no_cache: bool) -> List[Dict[str, Any]]:
+    """loading mitre mitgations
+
+    Args:
+        no_cache (bool): if cache should not be used
+
+    Returns:
+        List[Dict[str, Any]]: mitre mitigations as dictionary
+    """
     if os.path.exists(MIT_PATH) and not no_cache:
         logger.info("Loading mitigations from local JSON file.")
         return load_json(MIT_PATH)
@@ -91,6 +131,14 @@ def load_mitigations(no_cache: bool) -> List[Dict[str, Any]]:
             exit(2)
 
 def load_sigma_rules(no_cache: bool) -> List[Dict[str, Any]]:
+    """loading sigma rules
+
+    Args:
+        no_cache (bool): if cache should not be used
+
+    Returns:
+        List[Dict[str, Any]]: sigma rules as dictionary
+    """
     if os.path.exists(SIGMA_RULES_PATH) and not no_cache:
         logger.info("Loading sigma rules from local JSON file.")
         return load_json(SIGMA_RULES_PATH)
@@ -121,6 +169,14 @@ def load_sigma_rules(no_cache: bool) -> List[Dict[str, Any]]:
         return all_sigma_rules_sanitized
 
 def load_guardsight(no_cache: bool) -> List[Dict[str, Any]]:
+    """loading iron bow (guardsight) data
+
+    Args:
+        no_cache (bool): if cache should not be used
+
+    Returns:
+        List[Dict[str, Any]]: iron bow (guardsight) data as dictionary
+    """
     if os.path.exists(GUARDSIGHT_RESPONSES_PATH) and not no_cache:
         logger.info("Loading guardsight responses from local JSON file.")
         return load_json(GUARDSIGHT_RESPONSES_PATH)
@@ -151,6 +207,14 @@ def load_guardsight(no_cache: bool) -> List[Dict[str, Any]]:
     return all_guardsight_responses
 
 def load_atomic_tests(no_cache: bool) -> List[Dict[str, Any]]:
+    """loading atomic tests data
+
+    Args:
+        no_cache (bool): if cache should not be used
+
+    Returns:
+        List[Dict[str, Any]]: atomic tests data as dictionary
+    """
     if os.path.exists(ATOMIC_TEST_PATH) and not no_cache:
         logger.info("Loading atomic red tests from local JSON file.")
         return load_json(ATOMIC_TEST_PATH)
@@ -180,6 +244,14 @@ def load_atomic_tests(no_cache: bool) -> List[Dict[str, Any]]:
         return all_atomic_tests
 
 def load_all_data(no_cache: bool) -> Dict[str, Any]:
+    """starting all load functions
+
+    Args:
+        no_cache (bool): if cache should not be used
+
+    Returns:
+        List[Dict[str, Any]]: object with all data
+    """
     return {
         'techniques': load_techniques(no_cache),
         'relationships': load_relationships(no_cache),
@@ -191,6 +263,14 @@ def load_all_data(no_cache: bool) -> Dict[str, Any]:
     }
 
 def serialize_techniques(techniques):
+    """util function to serialize techniques
+
+    Args:
+        techniques (_type_): techniques to be serialized
+
+    Returns:
+        _type_: techniques as dictionary
+    """
     global markdown_to_html_bool
     serialized = []
     for t in techniques:
@@ -244,6 +324,14 @@ def serialize_techniques(techniques):
     return serialized
 
 def serialize_relationships(relationships):
+    """util function to serialize relationships
+
+    Args:
+        relationships (_type_): relationships to be serialized
+
+    Returns:
+        _type_: relationships as dictionary
+    """
     serialized = []
     for rel in relationships:
         serialized_rel = json.loads(rel.serialize())        
@@ -263,6 +351,14 @@ def serialize_relationships(relationships):
     return serialized
 
 def serialize_groups(groups):
+    """util function to serialize groups
+
+    Args:
+        groups (_type_): groups to be serialized
+
+    Returns:
+        _type_: groups as dictionary
+    """
     serialized = []
     for group in groups:
         serialized_grp = json.loads(group.serialize())        
@@ -283,6 +379,14 @@ def serialize_groups(groups):
     return serialized
 
 def serialize_mitigations(mitigations):
+    """util function to serialize mitgations
+
+    Args:
+        mitgations (_type_): mitgations to be serialized
+
+    Returns:
+        _type_: mitgations as dictionary
+    """
     serialized = []
     for m in mitigations:
         serialized_m = json.loads(m.serialize())
@@ -302,6 +406,14 @@ def serialize_mitigations(mitigations):
     return serialized
 
 def replace_keys(obj):
+    """util function to get rid of unwanted characters in keys
+
+    Args:
+        obj (_type_): data with unwanted characters in keys
+
+    Returns:
+        _type_: data without unwanted characters in keys
+    """
     if isinstance(obj, dict):
         new_obj = {}
         for k, v in obj.items():
