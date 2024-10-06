@@ -614,7 +614,15 @@ def fetch_all_techniques(tech_path="scripts/framework/cache/all_techniques.json"
     if os.path.exists(tech_path) and not no_cache:
         app_logger.info("Loading techniques from local JSON file.")
         with open(tech_path, 'r') as json_file:
-            techniques_list = json.load(json_file)
+            _all_techniques = json.load(json_file)
+            techniques_list = []
+            for t in _all_techniques:
+                technique_info = {
+                    "score": 0,
+                    "technique_id": t['technique_id'],
+                    "enabled": False
+                }
+                techniques_list.append(technique_info)
     else:
         app_logger.info("Retrieving all techniques from ATT&CK server")
         try:
@@ -662,7 +670,7 @@ def process_json_file(file, all_techniques):
         "versions": {
             "layer": "4.5",
             "attack": "15",
-            "navigator": "5.0.1"
+            "navigator": "5.1.0"
         },
         "gradient": {
             "colors": ["#FAAAAA", "#420000"],
@@ -679,7 +687,11 @@ def process_json_file(file, all_techniques):
 
     # Create a set of technique IDs from the imported JSON file
     file_techniques = file.get("techniques", [])
-    imported_technique_ids = {file['technique'].get("technique_id") for file['technique'] in file_techniques if "technique_id" in file['technique']}
+    imported_technique_ids = [file['technique'].get("technique_id") for file in file_techniques if "technique_id" in file['technique']]
+    
+    app_logger.info(len(file_techniques))
+    app_logger.info(file_techniques[0].keys())
+    app_logger.info(file_techniques[0]["technique"].keys())
     
     total_elements = len(file.get("keywords", [])) + len(file.get("groups", []))
 
@@ -716,7 +728,7 @@ def process_json_file(file, all_techniques):
             "responsesSum": responses_sum,
             "testsSum": tests_sum
         }
-
+        app_logger.info(technique_entry)
         result_data["techniques"].append(technique_entry)
 
     # Add techniques from the ATT&CK framework that were not in the imported JSON
@@ -730,6 +742,8 @@ def process_json_file(file, all_techniques):
                 "enabled": False
             }
             result_data["techniques"].append(technique_entry)
+        else:
+            app_logger.info(f"NOT IN {technique_id}")
     
     return result_data
 
